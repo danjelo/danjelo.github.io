@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>programming blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="prism.css" rel="stylesheet" />
+  <link href="style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <h1>Pagination with Firebase Firestore</h1>
+  <p>
+    With Firestore it is possible to use a document snapshot to define a query cursor. This is very convenient when you want
+    to split data returned by a query into batches (i.e paging) and can't use simple values to define a start point for a query.
+    See more in <a href="https://firebase.google.com/docs/firestore/query-data/query-cursors" target="_blank">the official documentation</a>
+    <br>
+    The way to do this is to keep track of the latest document in a batch and use it in the query to get the
+    next batch. </p>
+  <p>A common scenario is to have 
+      For this purpose I have found it nice to encapsulate the query logic in a single function : </p>
+
+
+  <p>
+    <img src="img/paging.png" >
+  </p>
+
+<pre><code class="language-javascript">
+  //FireStore document structure
+
+  { 
+    createdAt: "January 10, 2018 at 10:37:10 PM UTC+1", //timestamp type
+    rate: 7,
+    uid: "7DwKkQIqFYbU72Gbuzb9WVtvkR53",
+    userDisplayName: "Daniel P",
+    volumeId:  "dEocBAAAQBAJ",
+    volumeTitle: "Php Architect's Guide to Php 5 Migration ",
+    image:"url.."
+  }
+
+</code></pre>
+
+<pre><code class="language-javascript">
+import * as firebase from 'firebase/app'
+import 'firebase/firestore'
+
+//helper to return a QuerySnapShot data as an array
+export const snapToArray = snap => {
+    if (snap.empty) return []
+    return snap.docs.map(doc => doc.data())
+}
+
+//helper to get the last document in a QuerySnapShot
+export const getLastDoc = snap => {
+    if (snap.empty) return null
+    return snap.docs[snap.docs.length - 1]
+}
+
+// this function assumes you have a document where rates total are incremented 
+// or decremented for every rating added or removed
+export const getRatesCount = async () => {
+  const doc = firebase.firestore().collection('settings').doc('rates')
+  const count = await doc.get()
+  return count.data().numRates
+}
+
+//dynamically build query
+export const getRates = (doc, orderBy, pagesize, dir = 'desc') => {
+    let query =
+        firebase.firestore().collection('rates')
+            .orderBy(orderBy, dir)
+            .limit(pagesize)
+    if (doc !== null) {
+        query = query.startAfter(doc)
+    }
+    return query.get()// get executes query and returns result as a QuerySnapShot
+}
+</code></pre>
+
+<pre><code class="language-javascript">
+import React, { Component } from 'react'
+
+import RatesRender from './RatesRender'
+
+import { getRates, getRatesCount, snapToArray, getLastDoc } from './RatesQuery'
+
+
+class Rates extends Component {
+
+    state = {
+        loading: true,
+        rates: [],
+        start: 0,
+        count: 0,
+        orderBy: 'createdAt',
+        pageSize: 10,
+        lastDoc: null
+    }
+
+    componentDidMount() { 
+        // the api calls will be done in parallel, 
+        // i.e _getRatesCount will not wait for _getRates to succeed
+        this._getRates(0, null)
+        this._getRatesCount()
+    }
+
+    _getRatesCount = async () => {
+        const count = await getRatesCount()
+        this.setState({ count: count })
+    }
+
+    _getRates = async (pageStart, order) => {
+        // re-render with loading indicator
+        this.setState({
+            loading: true,
+            rates: []
+        })
+        // calculate new state
+        const { lastDoc, pageSize, orderBy, start } = this.state
+        const newOrderBy = order || orderBy
+        const doc = pageStart === 0 ? null : lastDoc
+        const newStart = pageStart === 0 ? 0 : start + pageSize
+        // get new data
+        const snap = await getRates(doc, newOrderBy, pageSize)
+        // re-render with new data
+        this.setState({
+            rates: snapToArray(snap),
+            lastDoc: getLastDoc(snap),
+            start: newStart,
+            loading: false,
+            orderBy: newOrderBy
+        })
+    }
+
+    orderBy = orderBy => {
+        this._getRates(0, orderBy)
+    }
+
+    page = startAt => {
+        this._getRates(startAt, null)
+    }
+
+    render() {
+        // filter out state 'lastDoc' not needed in rendering
+        const { lastDoc, ...passThroughState } = this.state 
+        return (
+            &lt;RatesRender
+                {...passThroughState} //send rest of state as props
+                onOrderBy={this.orderBy}
+                onPage={this.page} />
+        )
+    }
+}
+
+export default Rates
+</code></pre>
+
+
+
+
+<pre><code class="language-javascript">
+import React from 'react'
+
+// stateless function to handle rendering
+const RatesRender = ({ rates, count, start, pageSize, loading, orderBy, onPage, onOrderBy }) =>
+  &lt;div>
+      {loading && &lt;span>loading...&lt;/span>}
+      
+      { //rendering code for paging omitted for brewity ...}
+
+      {rates.map(rate =>
+          &lt;div key={r.uid + r.volumeId}> 
+            {rate.volumeTitle} 
+            //...etc 
+          &lt;/div>
+      )}
+  &lt;/div>
+
+RatesRender.propTypes = {
+    rates: T.array.isRequired,
+    count: T.number.isRequired,
+    pageSize: T.number.isRequired,
+    start: T.number.isRequired,
+    loading: T.bool.isRequired,
+    orderBy: T.string.isRequired,
+    onPage: T.func.isRequired,
+    onOrderBy: T.func.isRequired,
+}
+
+export default RatesRender
+</code></pre>
+
+<p>
+  Some limitations with this example:
+  <ul>
+    <li>No error handling to handle api errors or similar. It is rather easy easily handled by wrapping api calls with try/catch
+    and have an error property in our state.
+    <li>There is no loading indicator/handling for the total count api call, 
+      also an initial re-render is done once when the count completes and once when the data fetch completes
+    <li>The total count is not recalculated on paging and change of order by, this could lead to a mismatch if rates are
+    submitted after the first render
+    <li>We are essentially exposing the FireStore document property names in our UI logic/rendering. We could map the data
+    to a custom object if this is a concern.
+  </ul>
+</p>
+
+
+
+<script src="prism.js"></script>
+</body>
+
+</html>

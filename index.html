@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <title>programming blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="../style.css" rel="stylesheet" />
+</head>
+
 <body>
+
 <h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages. dpasdas</p>
 
-
-<pre style="background:#000;color:#f8f8f8"><span style="color:#99cf50">export</span> <span style="color:#99cf50">const</span> getRates <span style="color:#e28964">=</span> async (startAfter, orderBy, pagesize <span style="color:#e28964">=</span> <span style="color:#3387cc">10</span>) <span style="color:#e28964">=</span><span style="color:#e28964">></span> {
-    let query <span style="color:#e28964">=</span>
-        firebase.firestore().collection(<span style="color:#65b042">'rates'</span>)
-            .orderBy(orderBy, <span style="color:#65b042">'desc'</span>)
-            .limit(pagesize)
-    <span style="color:#e28964">if</span> (startAfter <span style="color:#e28964">!</span><span style="color:#e28964">==</span> <span style="color:#3387cc">null</span>) {
-        query <span style="color:#e28964">=</span> query.startAfter(startAfter)
-    }
-    <span style="color:#e28964">return</span> await query.get()
-}
-
-</pre>
 </body>
 </html>

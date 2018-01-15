@@ -1,0 +1,205 @@
+
+html {
+    font-family: sans-serif;
+    line-height: 1.15;
+    box-sizing: border-box;
+    font-size: 100%;  
+  }
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit; }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fefefe;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-weight: normal;
+    line-height: 1.5;
+    color: #0a0a0a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; }
+  
+  img {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    height: auto;
+    -ms-interpolation-mode: bicubic; }
+  
+  
+  hr {
+    box-sizing: content-box;
+    height: 0;
+    overflow: visible;
+    clear: both;
+    margin: 1.25rem auto;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 1px solid #cacaca;
+    border-left: 0; }
+  
+  
+    /*
+    http://csswizardry.com/2012/06/single-direction-margin-declarations/
+    fix most collapsing margins problems  Don’t mix margin-top and margin-bottom
+  */
+  ul,ol,dd,
+  article, aside, footer, header, hgroup, menu, nav, section,
+  p,figure,form,address,
+  pre, table, fieldset, hr {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+  ul ul, ol ol{margin-bottom: 0}
+  
+  
+  /* Grid
+     ==========================================================================
+    https://css-tricks.com/dont-overthink-flexbox-grids/
+    http://codepen.io/bradwestfall/pen/yJVvBP/
+  */
+  
+  @media screen and (min-width: 40rem)
+  {
+    .grid { display: flex;}
+    .grid { margin-bottom: 1.5rem;}
+    .grid > .flex-1 {flex: 1;}
+    .grid > .flex-2 {flex: 2;}
+    .grid > .flex-3 {flex: 3;}
+    .grid > .flex-4 {flex: 4;}
+    .grid > .flex-5 {flex: 5;}
+    .grid > .flex-6 {flex: 6;}
+    .grid > .flex-7 {flex: 7;}
+    .grid > .flex-8 {flex: 8;}
+    .grid > .align-right {text-align: right;}
+    .grid.with-gutters {margin-left: -0.5em;margin-right: -0.5em;  }
+    .grid.with-gutters > * {margin-left: 0.5em;margin-right: 0.5em;  }
+    .grid [class*='flex']>:last-child { margin-bottom: 0;}
+    .test .grid [class*='flex'] {background-color:#ccc  }
+  }
+  
+  @media screen and (max-width: 40rem) {
+    .grid [class*='flex']{ margin-bottom: 1.5rem }
+  }
+  
+  /* Generic classes
+     ========================================================================== */
+  
+  
+     .margin-bottom, .mb { margin-bottom: 1.5rem  !important}
+     .margin-right, .mr { margin-right: 20px !important }
+     .margin-bottom0, .mb0 { margin-bottom: 0 !important}
+  
+  /* Typo
+     ==========================================================================
+  
+ */
+  
+  p {
+    font-size: inherit;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility; 
+  }
+  
+  
+  h1{
+    font-size: 1.5rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+  
+  h2{
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+  
+  h3{
+    font-size: 1.1875rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+  
+  h4 {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+  
+  h5 {
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+    
+  h6 {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 0.5rem; }
+  
+  /* Links
+     ==========================================================================
+  */
+  
+  a {
+    line-height: inherit;
+    color: #1779ba;
+    text-decoration: none;
+    cursor: pointer; }
+    a:hover, a:focus {
+      color: #1468a0; }
+    a img {
+      border: 0; }
+  
+  a:active,
+  a:hover {
+    outline-width: 0; }
+  
+  
+    a[href^="http"]:not(.noicon)::after {
+      content: " " url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAVklEQVR4Xn3PgQkAMQhDUXfqTu7kTtkpd5RA8AInfArtQ2iRXFWT2QedAfttj2FsPIOE1eCOlEuoWWjgzYaB/IkeGOrxXhqB+uA9Bfcm0lAZuh+YIeAD+cAqSz4kCMUAAAAASUVORK5CYII=");}
+    .noicon a::after {
+      content: none !important;}
+  
+  
+  /* Crumbs
+     ==========================================================================
+  */
+  
+  .breadcrumbs {
+    margin: 0 0 1.5rem 0; }
+    .breadcrumbs > span {
+      font-size: 0.6875rem;
+      color: #0a0a0a;
+      cursor: default;
+      text-transform: uppercase; }
+      .breadcrumbs span:not(:last-child)::after {
+        position: relative;
+        top: 1px;
+        margin: 0 0.75rem;
+        opacity: 1;
+        content: "/";
+        color: #cacaca; }
+    .breadcrumbs a {
+      color: #1779ba; }
+      .breadcrumbs a:hover {
+        text-decoration: underline; }
+    .breadcrumbs .disabled {
+      color: #cacaca;
+      cursor: not-allowed; }
+  
+
+
+      @media screen and (min-width: 40rem) {
+        body{
+          margin: 0 auto;
+          max-width: 60rem;
+          min-height: 30rem
+        } 
+      }
+      
+  
