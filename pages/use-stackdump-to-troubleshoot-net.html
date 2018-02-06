@@ -41,23 +41,24 @@
    You use it like this:</p>
     
     <p>1. Find the Process Id. Open a cmd shell</p>
-    <div class="snippet">
-    <pre>
+<div class="snippet">
+<pre>
+    // this will list active .Net processes with associated PID:
+    C:\Programs\stackdump\Net4\X64\StackDump.exe   
 
-        C:\Programs\stackdump\Net4\X64\StackDump.exe   // this will list active .Net processes with associated PID
-
-        //example output:
-        //12540 w3wp.exe
-    </pre>
-    </div>
+    //example output:
+    //12540 w3wp.exe
+</pre>
+</div>
     <p>2. List threads </p>
     <div class="snippet">
-    <pre>
+<pre>
+    //list all running threads in PID 12540 with stack traces:
+    StackDump.exe 12540     
 
-        StackDump.exe 12540     //this will list all running threads in the process 12540 with it's stack traces
-
-        StackDump.exe 12540 > "dump.txt" //same as above but will put it in a file instead
-    </pre>
+    //same as above but will put it in a file instead:
+    StackDump.exe 12540 > "dump.txt" 
+</pre>
     </div>
     <p>Native threads will be empty but listed. The first line in a managed thread will indicate what this thread is hanging on the time when the stacks were taken.</p>
 </main>
