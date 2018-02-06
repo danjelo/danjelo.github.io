@@ -211,7 +211,9 @@ h2, h3, h4, h5, h6 {
   body { 
     padding:0 0.5rem 0 0.5rem; }
   main {   
+    margin-bottom: 1rem;
     background-color: white; border-radius: 5px;  padding:10px; box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3); }
+    
 }
 
 @media screen and (min-width: 40rem) { 

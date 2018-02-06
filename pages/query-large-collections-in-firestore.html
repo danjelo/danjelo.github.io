@@ -122,14 +122,18 @@ firebase.firestore().collection('rates')
     check the size of the <span class="snippet">querySnapshot</span>, however this would also mean that all the documents are loaded 
     and might result in performance
     problems:  
-    <div class="snippet">
-        <pre>
+<div class="snippet">
+<pre>
 
-        firebase.firestore().collection('rates').get().then(function(querySnapshot) {  
-            console.log(querySnapshot.size); 
-        });
-    </pre>
-    </div>
+    firebase.firestore().collection('rates')
+        .get()
+        .then(
+            function(querySnapshot) {  
+                console.log(querySnapshot.size); 
+            }
+        );
+</pre>
+</div>
     The best way to have a count is to instead use <a target="_blank" href="https://firebase.google.com/docs/firestore/solutions/aggregation">aggregation</a>
     and increment a counter value for every write in a separate document
        
