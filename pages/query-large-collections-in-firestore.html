@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <title>programming blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="style.css" rel="stylesheet" />
+    <link href="prism.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Share+Tech+Mono&effect=destruction' rel='stylesheet' type='text/css' />
+    <script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+</head>
+
+<body>
+
+    
+    <header>
+            <a href="../index.html">
+                <h1 class="font-effect-destruction">
+                    <i class="fas fa-code-branch"></i>
+                    DP's PROGRAMMING NOTES
+                    <i class="fas fa-code"></i>
+                </h1>
+            </a>        
+
+      </header>
+<main>
+
+<h2>Querying large collections in Cloud Firestore</h2>
+<span class="pubdate">2018-01-13</span>
+<p>
+    <a href="https://firebase.google.com/docs/firestore/" target="_blank">Cloud Firestore</a> is a NoSQL database optimized 
+    for storing large collections of small documents. 
+    It might not always
+    be obvious how to effectively query Firestore collections if you, like me, come from a more traditional RDBMS background.
+    So lets take a look at some common scenarios.
+
+</p>
+
+<h3>Realtime updates</h3>
+<p>
+    The awesome
+    <a target="_blank" href="https://firebase.google.com/docs/firestore/query-data/listen">realtime updates</a> 
+    functionality means we can listen to changes to documents in a collection with
+    <span class="snippet">onSnapshot</span> method. 
+    The initial call contains added events for all existing documents that match the query, this might result in performance
+    problems if we have thousands or more documents.
+   The solution is to add a date criteria, see more:
+    <a href="https://github.com/firebase/firebase-js-sdk/issues/265" 
+    target="_blank">https://github.com/firebase/firebase-js-sdk/issues/265</a>
+    
+</p>
+<p>
+    For a concrete example, lets say you are building an app where users can rate books, 
+    and you are storing the rates in 
+    <span class="snippet">firebase.firestore().collection('rates')</span>
+    and you want new ratings to be seen in realtime for all connected users. 
+    See code example below:
+</p>
+
+<pre><code class="language-javascript">        
+//NOT SO GOOD
+firebase.firestore().collection('rates')
+.onSnapshot(snap => {
+    //snap.docs contains all documents in collection on initial call 
+})
+
+
+// BETTER        
+firebase.firestore().collection('rates')
+.where('createdAt', '>', new Date())      // added a date criteria
+.onSnapshot(snap => {
+    //snap empty on initial call
+    if (snap.size > 0) {
+        console.log( snap.docs[0].data() )  //do something with subsequent events
+    }
+})
+</code></pre>
+
+
+
+
+
+<h3>Pagination and sorting</h3>
+<p> Lets say another requirement is to list ratings with paging, a totals count, and the possibility to change
+    the order of items. Maybe the UI looks something like this:</p>
+<p>
+    <img src="img/paging.png" style="box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.3);">
+</p>
+
+<p>
+    The document structure looks like this for this example:
+</p>
+    
+<pre><code class="language-javascript">
+{ 
+    createdAt: "January 10, 2018 at 10:37:10 PM UTC+1", //timestamp type
+    rate: 7,
+    uid: "7DwKkQIqFYbU72Gbuzb9WVtvkR53",
+    userDisplayName: "Test User",
+    volumeId:  "dEocBAAAQBAJ",
+    volumeTitle: "Php Architect's Guide to Php 5 Migration ",
+    image: "http://..."
+}
+</code></pre>
+
+<p>
+    Clearly you do not want to fetch all items in one request, it is better to fetch data in batches. 
+    This also has the advantage that you avoid pagination and sorting logic on the client side.
+    With query cursors you can split data returned by a query into batches according to the parameters you define in your query.
+    See more in
+    <a href="https://firebase.google.com/docs/firestore/query-data/query-cursors" target="_blank">the official documentation</a>. 
+    This is very convenient when you want to paginate data and can't use simple values
+    to define a start point in a dataset. 
+</p>
+
+
+<h3>Totals count</h3>
+<p>
+    There is currently no built-in way to get only the count of all documents in a collection, but it is possible to
+    check the size of the <span class="snippet">querySnapshot</span>, however this would also mean that all the documents are loaded 
+    and might result in performance
+    problems:  
+    <div class="snippet">
+        <pre>
+
+        firebase.firestore().collection('rates').get().then(function(querySnapshot) {  
+            console.log(querySnapshot.size); 
+        });
+    </pre>
+    </div>
+    The best way to have a count is to instead use <a target="_blank" href="https://firebase.google.com/docs/firestore/solutions/aggregation">aggregation</a>
+    and increment a counter value for every write in a separate document
+       
+</p>
+
+
+<h3>Code example </h3>
+<p>
+    Lets look at how we could write some code in JavaScript that query Firestore for ratings data and a 
+    ratings total count:
+</p>
+<pre><code class="language-javascript">
+import * as firebase from 'firebase/app'
+import 'firebase/firestore'
+
+//helper to return a QuerySnapShot data as an array
+export const snapToArray = snap => {
+    if (snap.empty) return []
+    return snap.docs.map(doc => doc.data())
+}
+
+//helper to get the last document in a QuerySnapShot
+export const getLastDoc = snap => {
+    if (snap.empty) return null
+    return snap.docs[snap.docs.length - 1]
+}
+
+// assumes you have a document where rates total are incremented 
+export const getRatesCount = async () => {
+  const doc = firebase.firestore().collection('totals').doc('rates')
+  const count = await doc.get()
+  return count.data().numRates
+}
+
+//dynamically build query, param "doc" is the last visible document
+export const getRates = (doc, orderBy, pagesize, dir = 'desc') => {
+    let query =
+        firebase.firestore().collection('rates')
+            .orderBy(orderBy, dir)
+            .limit(pagesize)
+    if (doc !== null) {
+        query = query.startAfter(doc)
+    }
+    return query.get()// returns result as a QuerySnapShot
+}
+</code></pre>
+
+<p>
+    The question is where to keep our state used for building the query, 
+    one approach is to avoid stateful custom made classes or variables and use 
+    the UI state mechanism available if you use a framework. 
+    Lets look at a ReactJS example where we have all state in a React component: 
+</p>
+
+<pre><code class="language-javascript">
+import React, { Component } from 'react'
+import RatesRender from './RatesRender'
+import { getRates, getRatesCount, snapToArray, getLastDoc } from './RatesQuery'
+
+
+class Rates extends Component {
+
+    state = {
+        loading: true,
+        rates: [],
+        start: 0,
+        count: 0,
+        orderBy: 'createdAt',
+        pageSize: 10,
+        lastDoc: null
+    }
+
+    componentDidMount() { 
+        this._getRates(0, null)
+        this._getRatesCount()
+    }
+
+    _getRatesCount = async () => {
+        const count = await getRatesCount()
+        this.setState({ count: count })
+    }
+
+    _getRates = async (startAfter = null, order = null) => {
+      // calculate new state
+      const { pageSize, orderBy, start } = this.state
+      const newOrderBy = order || orderBy
+      const newStart = startAfter === null ? 0 : start + pageSize
+      // get new data
+      const snap = await getRates(startAfter, newOrderBy, pageSize)
+      // re-render with new data
+      this.setState({
+          rates: snapToArray(snap),
+          lastDoc: getLastDoc(snap),
+          start: newStart,
+          loading: false,
+          orderBy: newOrderBy
+      })
+  }
+
+  setLoading = () => this.setState({ loading: true, rates: [] })
+
+  orderBy = orderBy => {
+      this.setLoading()
+      this._getRates(null, orderBy)
+  }
+
+  page = startAt => {
+      this.setLoading()
+      this._getRates(startAt || this.state.lastDoc) // sending null when displaying first in dataset
+  }
+
+  render() {
+      // filter out state 'lastDoc' not needed in rendering
+      const { lastDoc, ...passThroughState } = this.state 
+      return (
+          &lt;RatesRender
+              {...passThroughState} //send rest of state as props
+              onOrderBy={this.orderBy}
+              onPage={this.page} />
+      )
+  }
+}
+
+export default Rates
+</code></pre>
+
+
+<p>The markup could be separated from state handling and reside in a separate component:</p>
+
+
+<pre><code class="language-javascript">
+import React from 'react'
+
+// stateless function to handle rendering
+const RatesRender = props =>
+  &lt;div>
+      {props.loading && &lt;span>loading...&lt;/span>}
+      
+      { //rendering code for paging omitted for brewity ...}
+
+      {props.rates.map(rate =>
+          &lt;div key={r.uid + r.volumeId}> 
+            {rate.volumeTitle} 
+            //...etc 
+          &lt;/div>
+      )}
+  &lt;/div>
+
+RatesRender.propTypes = {
+    rates: T.array.isRequired,
+    count: T.number.isRequired,
+    pageSize: T.number.isRequired,
+    start: T.number.isRequired,
+    loading: T.bool.isRequired,
+    orderBy: T.string.isRequired,
+    onPage: T.func.isRequired,
+    onOrderBy: T.func.isRequired,
+}
+
+export default RatesRender
+</code></pre>
+
+
+
+<p>
+    Some things to be aware of with this example:
+    <ul>
+        <li>No error handling to handle api errors or similar. This is rather easy easily handled by wrapping api calls with try/catch
+            and have an error property in our state.</li>
+        <li>There is no loading indicator/handling for the total count api call. 
+            Also an initial re-render is done once when
+            the count completes and once when the data fetch completes, 
+            this is good for percieved performance but might complicate 
+            rendering logic.
+        </li>
+        <li>The total count is not recalculated on paging and change of order by, 
+            this could lead to a mismatch if rates are
+            submitted after the first render.</li>
+        <li>We are essentially exposing the FireStore document property names in our UI logic/rendering. We could map the data
+            to a custom object if this is a concern.</li>
+        <li>You might want to prevent multiple click on pagination links while loading is in progress</li>
+    </ul>
+</p>
+
+
+<h3>Indexing</h3>
+<p>
+        What about indexing? No problems, from the official docs:<br>
+        
+        <q>
+        All document fields are automatically indexed, so queries that only use equality clauses don't need additional indexes. 
+        If you attempt a compound query with a range clause that doesn't map to an existing index, you receive an error. 
+        The error message includes a direct link to create the missing index in the Firebase console.
+        </q>
+        
+        
+        </p>
+
+</main>
+
+<script src="prism.js"></script>
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- danjelo -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-4174842744027387"
+     data-ad-slot="7693952539"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</body>
+
+</html>
