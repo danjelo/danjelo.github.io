@@ -40,26 +40,29 @@
      Since it is just an .exe there is no installation needed. And it can be an alternative to analyze huge dump files.
    You use it like this:</p>
     
-    <p>1. Find the Process Id. Open a cmd shell</p>
+    <p>1. Find the Process Id. Open a cmd shell
 <div class="snippet">
 <pre>
-    // this will list active .Net processes with associated PID:
-    C:\Programs\stackdump\Net4\X64\StackDump.exe   
 
-    //example output:
-    //12540 w3wp.exe
+// list active .Net processes with associated PID:
+C:\Programs\stackdump\Net4\X64\StackDump.exe   
+
+//example output:
+//12540 w3wp.exe
 </pre>
 </div>
-    <p>2. List threads </p>
+</p>
+    <p>2. List threads 
     <div class="snippet">
 <pre>
-    //list all running threads in PID 12540 with stack traces:
-    StackDump.exe 12540     
 
-    //same as above but will put it in a file instead:
-    StackDump.exe 12540 > "dump.txt" 
+//list all running threads in PID 12540 with stack traces:
+StackDump.exe 12540     
+
+//same as above but will put it in a file instead:
+StackDump.exe 12540 > "dump.txt" 
 </pre>
-    </div>
+    </div></p>
     <p>Native threads will be empty but listed. The first line in a managed thread will indicate what this thread is hanging on the time when the stacks were taken.</p>
 </main>
 
