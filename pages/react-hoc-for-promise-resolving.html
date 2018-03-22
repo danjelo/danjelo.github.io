@@ -321,6 +321,21 @@ export default QuotePage
 
 // note: this would mean the api request's are done sequential,
 // i.e "AnotherQuote" will wait for the first to render, which might not be desired
+// Example below would do parallel requests:
+
+const TheQuote = promisedHOC(promise)(QuoteSimple)
+
+const AnotherQuote = promisedHOC(promise)(QuoteSimple)
+
+const QuotePage = () => {
+    return {
+        &lt;div>
+            &lt;p>{props.firstName} says: &lt;/p>
+            &lt;TheQuote />
+            &lt;AnotherQuote />
+        &lt;/div>
+    }
+}
 
 //injection could also be achived with "children" props:
 
