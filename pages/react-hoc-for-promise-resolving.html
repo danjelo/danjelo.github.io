@@ -271,7 +271,8 @@ const TheQuote = promisedHOC(promise, mapToProps)(Quote, Loader, Fail)
 
 <p>
     One question is what to do when you want to resolve multiple promises for one component, 
-    you could certainly modify the HOC above for that purpose, another approach is to use composition and/or injection,
+    you could certainly modify the HOC above for that purpose, 
+    another approach is to use composition and/or injection,
     example below shows how to inject one component into another:
     
 </p>
@@ -295,13 +296,11 @@ Quote.propTypes = {
     AnotherQuote: T.func.isRequired
 }
       
-const QuoteB = props =>
-    &lt;div>
-        Another quote: 
-        &lt;q>
-            {props.theQuote}
-        &lt;/q>
-    &lt;/div>
+const QuoteSimple = props =>
+    &lt;q>
+        {props.theQuote}
+    &lt;/q>
+    
 
 
 const promise = () =>
@@ -310,7 +309,7 @@ const promise = () =>
 
 const TheQuote = promisedHOC(promise)(Quote)
 
-const AnotherQuote = promisedHOC(promise)(QuoteB)
+const AnotherQuote = promisedHOC(promise)(QuoteSimple)
 
 
 const QuotePage = () =>
@@ -320,7 +319,10 @@ const QuotePage = () =>
 
 export default QuotePage
 
-//this could also be achived with "children" props:
+//note: this would mean the api request's are done sequential,
+ i.e "AnotherQuote" will wait for the first to render, which might not be desired
+
+//injection could also be achived with "children" props:
 
 &lt;TheQuote
     firstName="Danne">
