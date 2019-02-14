@@ -27,11 +27,58 @@
       </header>
 <main>
 
-<h2>CDN</h2>
-
+<h2>CDN  </h2>
+    
+    <p>Using a CDN such as Clodflare, Akamai ,
+        Azure CDN or other can be a great performance boost four your web, 
+        there are some gotchas though I have come across that are easy to foresee, and some other nice tips </p>
+ 
+<h3>Cache content</h3>
 <p>
+Most CDN's allows for caching not just static assets but also entire HTML pages, 
+    typically they honor Cache-Control headers which makes it quite easy to control. <br>
+    Also remember that other content such as JSON or XML responses can be cached , 
+    so for example any non-personalized Ajax calls can be a canditate for caching also. 
+</p>
+ 
+        <h3>Think of Cache hit ratio</h3>
+<p>
+    Cache hit ratio is a measurement of how many content requests a cache is able to fill successfully, compared to how many requests it receives.
+    <br>
+    It might be tempting to aim for a very high ratio like 99%+ for lets say a startpage with many requests,
+    and have that page cached for something like 10 minutes or an hour or so. And maybe rely on cache invalidation to refresh.<br>
+    But having a lower cache time, like 60 seconds, would make content publishing more convenient
+    and probably beeing percieved as equally performant.
+    
+</p>
+    
+<h3>Timeout mismatch</h3>
+<p>
+    For example Cloudflare CDN waits 100 seconds for an HTTP response. If the origin doesn't respond in that time, 
+    Cloudflare closes the connection and serves Error 524. <br>
+    Typically this applies to all requests, not just static resources, 
+    so watch out for long running requests in your app such as api calls or such that might require more time. <br>
+    It makes sense to have an application timeout a few seconds below that of the CDN timeout value for this reason.
 </p>
 
+    <h3>HTTP Status Codes</h3>
+<p>
+ It is quite common to have custom error pages or handlers for 404 and 500 errors from API endpoints or pages. <br>
+    It also quite easy to forget to return correct HTTP Status code for errors. <br>
+    A "200 OK" Response for an error could result in the CDN caching that content and serve it to the users, 
+    and you would then have to manually purge the cache.
+    
+</p>
+    
+    
+    <h3>Personalization</h3>
+<p>
+    Not only relevant to CDN caching, but displaying personalized content is often best done with Ajax calls that update the DOM.<br>
+    A typical use case is an indication in the UI if a user is "online/logged in" or not.
+    <br>
+    If not handled async it would not be possible to have that page cached in a CDN, browser or Proxy server.
+</p>
+    
 </main>
 
 <script src="prism.js"></script>
