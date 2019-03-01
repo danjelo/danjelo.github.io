@@ -30,7 +30,8 @@
 <h2>React Custom Hook </h2>
     <span class="pubdate">2019-02-27</span>
     
-<p>Lets see how we can recreate some of the functionality we did in an earlier post <a href="react-hoc-for-promise-resolving.html">A React HOC for resolving promises</a>
+    <p><a href="https://reactjs.org/docs/hooks-overview.html">React Hooks</a> is a cool feauture that lets you  use state and other React features without writing a class. And can also be used for reusing logic between components.
+        Lets see how we can recreate some of the functionality we did in an earlier post <a href="react-hoc-for-promise-resolving.html">A React HOC for resolving promises</a>
   by using a React Hook  
     </p>
     
@@ -42,6 +43,15 @@
        <p>The Hook code:</p>
 
     <script src="https://gist.github.com/danjelo/623552cc1f1fba3c5ef41a403db29c9c.js"></script>
+    
+    <p>
+        If we want to abstract rendering logic for loading state and errors we could combine this with
+        <a href="https://reactjs.org/docs/render-props.html">Render Props</a>. It would then look someting like this:
+    </p>
+    
+    <script src="https://gist.github.com/danjelo/7bd5548c771ba9cdca8d0001fa8cb4fe.js"></script>
+    
+    
 </main>
 
 
