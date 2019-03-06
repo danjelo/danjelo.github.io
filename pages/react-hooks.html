@@ -45,12 +45,18 @@
     <script src="https://gist.github.com/danjelo/623552cc1f1fba3c5ef41a403db29c9c.js"></script>
     
     <p>
-        If we want to abstract rendering logic for loading state and errors we could combine this with
-        <a href="https://reactjs.org/docs/render-props.html">Render Props</a>. It would then look someting like this:
+        If we want to abstract rendering logic for loading state and errors we could put that logic inside the hook,
+        also lets have the fetch logic inside the hook as well. 
+        The Hook would then look like this:
     </p>
     
-    <script src="https://gist.github.com/danjelo/7bd5548c771ba9cdca8d0001fa8cb4fe.js"></script>
+ <script src="https://gist.github.com/danjelo/8562c9c459875584faa5c88caf5f3892.js"></script>
     
+    
+        <p>
+        The calling code would look like this:
+    </p>
+  <script src="https://gist.github.com/danjelo/b72dacc1411116c1cc7a4e5c411a2b3a.js"></script>
     
 </main>
 
