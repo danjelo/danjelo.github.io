@@ -44,14 +44,12 @@
 </p>
 
 <p>
-  First the attribute that can be used for different methods:
+  First the attribute class that can be used for different methods:
 </p>
-
-<script src="https://gist.github.com/danielclaremont/a393a35dd4e59874c8789dff04796d42.js"></script>
-
-
+<script src="https://gist.github.com/danjelo/f02756275e957f3d43ab07195813894d.js"></script>
+    
 <p>
-  Just decorate the method with this class:
+  To protect a method, just decorate the method with this class:
 </p>
 
 <pre>
@@ -62,7 +60,7 @@
         
 </pre>
         
-        <p>In your form, just add this:</p>
+        <p>In your form, just add this which will generate a cookie and hidden value:</p>
         
         <pre>
      
@@ -70,7 +68,7 @@
 
         </pre>
         
-        <p>From the javascript, simply add a header with the value from the generated token. (This header is needed if json is used, otherwise it could be sent as form data)</p>
+        <p>From the javascript, add a header with the value from the generated token. (This header is needed if json is used, otherwise it could be sent as form data)</p>
         
     <pre>
         fetch(url, {
