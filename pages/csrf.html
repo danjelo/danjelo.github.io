@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <title>DP's CODE NOTES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="style.css" rel="stylesheet" />
+    <link href="prism.css" rel="stylesheet" />
+    <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono&effect=destruction' rel='stylesheet' type='text/css' />
+    <script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+</head>
+
+<body>
+
+    
+    <header>
+            <a href="../index.html">
+                <h1 class="font-effect-destruction">
+                    <i class="fas fa-code-branch"></i>
+                    DP's CODE NOTES
+                    <i class="fas fa-code"></i>
+                </h1>
+            </a>        
+
+      </header>
+<main>
+
+<h2>Ajax and CSRF</h2>
+    <span class="pubdate">2019-03-13</span>
+
+
+<p> 
+  <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">Cross-Site Request Forgery (CSRF)</a> 
+   "is an attack that forces an end user to execute unwanted actions on a web application in which they're currently authenticated."
+   <br>
+   It is quite easy to forget to handle this vulnerability in general and maybe more so for Ajax endpoints. 
+   <br>
+   If implemented it does not only protect against CSRF but also gives a basic protection from spam bots and other attacks that makes a request directly to 
+   the endpoint from another server. Why? Since the attacker would need to first load a token from your site/page and have the correct token cookie set. 
+   This makes it a bit harder to attack your site but of course it is not nearly as protective as a captcha implementation. <br>
+   Lets look at a .NET MVC implementation:
+</p>
+
+<p>
+  First the attribute that can be used for different methods:
+</p>
+
+<script src="https://gist.github.com/danielclaremont/a393a35dd4e59874c8789dff04796d42.js"></script>
+
+
+<p>
+  Just decorate the method with this class:
+</p>
+
+<code>
+        [System.Web.Mvc.HttpPost]
+        [ValidateHeaderAntiForgeryToken]
+        public ActionResult Login([FromBody] LoginBody signin)
+        {....
+        
+        </code>
+        
+        <p>In your form:</p>
+        
+        <code>
+        <form>
+          @Html.AntiForgeryToken()
+          </form>
+        </code>
+        
+        <p>From the javascript, simply add a header with the value from the generated token. (This header is needed if json is used, otherwise it could be sent as form data)</p>
+        <code>
+        fetch(url, {
+          method: 'POST',
+          headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json',
+          __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value,
+
+      }...  </code>
+      
+</main>
+
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- danjelo -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-4174842744027387"
+     data-ad-slot="7693952539"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</body>
+
+</html>
