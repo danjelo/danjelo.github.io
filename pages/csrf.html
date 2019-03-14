@@ -32,8 +32,8 @@
 
 
 <p> 
-  <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">Cross-Site Request Forgery (CSRF)</a> 
-   "is an attack that forces an end user to execute unwanted actions on a web application in which they're currently authenticated."
+  <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">Cross-Site Request Forgery (CSRF)</a> &nbsp;
+    "...is an attack that forces an end user to execute unwanted actions on a web application in which they're currently authenticated."
    <br>
    It is quite easy to forget to handle this vulnerability in general and maybe more so for Ajax endpoints. 
    <br>
@@ -54,24 +54,25 @@
   Just decorate the method with this class:
 </p>
 
-<code>
+<pre>
         [System.Web.Mvc.HttpPost]
         [ValidateHeaderAntiForgeryToken]
         public ActionResult Login([FromBody] LoginBody signin)
         {....
         
-        </code>
+</pre>
         
-        <p>In your form:</p>
+        <p>In your form, just add this:</p>
         
-        <code>
-        <form>
+        <pre>
+     
           @Html.AntiForgeryToken()
-          </form>
-        </code>
+
+        </pre>
         
         <p>From the javascript, simply add a header with the value from the generated token. (This header is needed if json is used, otherwise it could be sent as form data)</p>
-        <code>
+        
+    <pre>
         fetch(url, {
           method: 'POST',
           headers: {
@@ -79,7 +80,7 @@
           'Content-type': 'application/json',
           __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value,
 
-      }...  </code>
+      }...  </pre>
       
 </main>
 
